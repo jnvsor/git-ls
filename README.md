@@ -5,6 +5,9 @@ List files and show their last commits
 Drop it in your `$PATH` with executable rights
 
 ## Example output
+
+Note that there is color highlighting that isn't shown in this example
+
 ```
 $ git ls -a
 1                   	Staged
