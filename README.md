@@ -6,7 +6,7 @@ Drop it in your `$PATH` with executable rights
 
 ## Example output
 ```
-$ git ls
+$ git ls -a
                    1	Staged
 12345678901234567890	Not committed
        composer.json	5 weeks ago     7748f2e	Add me to authors

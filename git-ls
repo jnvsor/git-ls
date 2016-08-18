@@ -1,8 +1,15 @@
 #!/bin/bash
 
+dotfiles=0
+
+if [ "$1" = "-a" -o "$1" = "-A" ]
+then
+    shift
+    dotfiles=1
+fi
+
 if [ "$#" -ne 0 ]
 then
-
     if [ ! -d "$1" ]
     then
         >&2 echo "Usage: git ls [directory]"
@@ -24,7 +31,10 @@ Creset='\033[0m'
 
 file_length="$(ls -A | wc -L)"
 
-shopt -s dotglob
+if [ "$dotfiles" -eq 1 ]
+then
+    shopt -s dotglob
+fi
 
 for file in *
 do
