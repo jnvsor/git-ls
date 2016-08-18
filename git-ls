@@ -1,0 +1,43 @@
+#!/bin/bash
+
+if [ "$#" -ne 0 ]
+then
+
+    if [ ! -d "$1" ]
+    then
+        >&2 echo "Usage: git ls [directory]"
+        exit 1
+    fi
+    cd "$1"
+fi
+
+if [ git rev-parse --is-inside-work-tree > /dev/null 2>&1 ]
+then
+    git rev-parse --is-inside-work-tree
+    exit 1
+fi
+
+file_length="$(ls -A | wc -L)"
+
+for file in * .[^.]*
+do
+    if [ "$file" = ".git" ]
+    then
+        continue
+    fi
+
+    printf "%${file_length}s\t" "$file"
+
+    if [ "$(git ls-files "$file")" ]
+    then
+        git log -1 --pretty="format:%ar%n%h%n%s" "$file" | tr "\n" "\t"
+    else
+        if git "check-ignore" "$file" > /dev/null
+        then
+            echo -n "Gitignored"
+        else
+            echo -n "Not committed"
+        fi
+    fi
+    echo ""
+done
