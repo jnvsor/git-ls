@@ -49,7 +49,7 @@ do
 
     if [[ "$status" == "??"* ]]
     then
-        echo -en "${Cred}Not committed$Creset"
+        echo -en "${Cred}Untracked$Creset"
     elif [[ "$status" == "A"* ]]
     then
         echo -en "${Cgreen}Staged$Creset"

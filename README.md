@@ -11,7 +11,7 @@ Note that there is color highlighting that isn't shown in this example
 ```
 $ git ls -a
 1                   	Staged
-12345678901234567890	Not committed
+12345678901234567890	Untracked
 composer.json       	5 weeks ago     7748f2e	Add me to authors
 examples            	3 months ago    25e6221	Run php-cs-fixer
 .gitignore          	2 weeks ago     e3ac374	Add compiled resources back into source
@@ -23,6 +23,5 @@ package.json        	2 weeks ago     e3ac374	Add compiled resources back into so
 README.md           	3 weeks ago     df9318b	Rename Kint class methods and properties
 resources           	2 weeks ago     e3ac374	Add compiled resources back into source
 src                 	6 days ago      bdad28d	Kint_Object_Closure: Consistent parentheses
-ttt                 	Not committed
-
+ttt                 	Untracked
 ```
