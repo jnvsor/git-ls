@@ -19,7 +19,9 @@ fi
 
 file_length="$(ls -A | wc -L)"
 
-for file in * .[^.]*
+shopt -s dotglob
+
+for file in *
 do
     if [ "$file" = ".git" ]
     then
