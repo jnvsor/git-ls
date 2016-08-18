@@ -57,7 +57,7 @@ do
     then
         echo -en "${Cgrey}Gitignored$Creset"
     else
-        git log -1 --pretty="format:%ar%n%C(Yellow)%h%Creset%n%s" "$file" | tr "\n" "\t"
+        git log -1 --pretty="format:%ar%n%C(Yellow)%h%Creset %s" "$file" | tr "\n" "\t"
     fi
 
     echo ""
