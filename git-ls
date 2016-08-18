@@ -17,6 +17,11 @@ then
     exit 1
 fi
 
+Cgreen='\033[0;32m'
+Cred='\033[0;31m'
+Cgrey='\033[0;37m'
+Creset='\033[0m'
+
 file_length="$(ls -A | wc -L)"
 
 shopt -s dotglob
@@ -30,16 +35,20 @@ do
 
     printf "%${file_length}s\t" "$file"
 
-    if [ "$(git ls-files "$file")" ]
+    status="$(git status --porcelain "$file")"
+
+    if [[ "$status" == "??"* ]]
     then
-        git log -1 --pretty="format:%ar%n%h%n%s" "$file" | tr "\n" "\t"
+        echo -en "${Cred}Not committed$Creset"
+    elif [[ "$status" == "A"* ]]
+    then
+        echo -en "${Cgreen}Staged$Creset"
+    elif git "check-ignore" "$file" > /dev/null
+    then
+        echo -en "${Cgrey}Gitignored$Creset"
     else
-        if git "check-ignore" "$file" > /dev/null
-        then
-            echo -n "Gitignored"
-        else
-            echo -n "Not committed"
-        fi
+        git log -1 --pretty="format:%ar%n%C(Yellow)%h%Creset%n%s" "$file" | tr "\n" "\t"
     fi
+
     echo ""
 done
