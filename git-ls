@@ -53,7 +53,7 @@ do
     elif [[ "$status" == "A"* ]]
     then
         echo -en "${Cgreen}Staged$Creset"
-    elif git "check-ignore" "$file" > /dev/null
+    elif git check-ignore "$file" > /dev/null
     then
         echo -en "${Cgrey}Gitignored$Creset"
     else
