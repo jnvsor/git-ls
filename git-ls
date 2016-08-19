@@ -1,12 +1,13 @@
 #!/bin/bash
 
 usage(){
-    echo 'Usage: git ls [-h | --help] [-c] [-a] [[--] directory]'
+    echo 'Usage: git ls [-h | --help] [-b | --batch | -c | --color] [-a | --all] [[--] directory]'
 }
 
 
 dotfiles=0
 colors=1
+formatting=1
 
 while :
 do
@@ -16,13 +17,19 @@ do
         exit 0
         ;;
 
-    -a|-A)
+    -a|-A|-all)
         shift
         dotfiles=1
         ;;
 
-    -c|-C)
+    -c|-C|--color)
         shift
+        colors=0
+        ;;
+
+    -b|-B|--batch)
+        shift
+        formatting=0
         colors=0
         ;;
 
@@ -53,27 +60,25 @@ then
     exit 1
 fi
 
-Cgreen=$'\e[0;32m'
-Cred=$'\e[0;31m'
-Cgrey=$'\e[0;37m'
-Cyellow=$'\e[0;33m'
-Creset=$'\e[0m'
 
-if [ "$colors" -ne 1 ]
+if [ "$colors" -eq 1 ]
 then
-    Cgreen=''
-    Cred=''
-    Cgrey=''
-    Cyellow=''
-    Creset=''
+    Cgreen=$'\e[0;32m'
+    Cred=$'\e[0;31m'
+    Cgrey=$'\e[0;37m'
+    Cyellow=$'\e[0;33m'
+    Creset=$'\e[0m'
 fi
 
-file_length="$(ls | wc -L)"
-
-if [ "$dotfiles" -eq 1 ]
+if [ "$formatting" -eq 1 ]
 then
-    file_length="$(ls -A | wc -L)"
-    shopt -s dotglob
+    file_length="$(ls | wc -L)"
+
+    if [ "$dotfiles" -eq 1 ]
+    then
+        file_length="$(ls -A | wc -L)"
+        shopt -s dotglob
+    fi
 fi
 
 for file in *
@@ -83,16 +88,26 @@ do
         continue
     fi
 
-    log="$(git log -1 --pretty="format:%cr%n%H%n%s" "$file")"
+    log="$(git log -1 --pretty="format:%cr"$'\t'"%H"$'\t'"%s" "$file")"
 
     if [ -n "$log" ]
     then
-        awk -v gitlog="$log" -v file="$file" 'BEGIN {
-            split(gitlog,l,"\n");
-            printf "%-'"$file_length"'s\t%-8.15s\t'"$Cyellow"'%.7s'"$Creset"'\t%s\n", file, l[1], l[2], l[3]
-        }'
+        if [ "$formatting" -eq 0 ]
+        then
+            printf "$file\t$log\n"
+        else
+            awk -v gitlog="$log" -v file="$file" 'BEGIN {
+                split(gitlog,l,"\t");
+                printf "%-'"$file_length"'s\t%-8.15s\t'"$Cyellow"'%.7s'"$Creset"'\t%s\n", file, l[1], l[2], l[3]
+            }'
+        fi
     else
-        printf "%-${file_length}s\t" "$file"
+        if [ "$formatting" -eq 0 ]
+        then
+            echo -ne "$file\t"
+        else
+            printf "%-${file_length}s\t" "$file"
+        fi
 
         status="$(git status --porcelain "$file")"
 
