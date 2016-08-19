@@ -24,10 +24,11 @@ then
     exit 1
 fi
 
-Cgreen='\033[0;32m'
-Cred='\033[0;31m'
-Cgrey='\033[0;37m'
-Creset='\033[0m'
+Cgreen=$'\e[0;32m'
+Cred=$'\e[0;31m'
+Cgrey=$'\e[0;37m'
+Cyellow=$'\e[0;33m'
+Creset=$'\e[0m'
 
 file_length="$(ls | wc -L)"
 
@@ -44,22 +45,31 @@ do
         continue
     fi
 
-    printf "%-${file_length}s\t" "$file"
+    log="$(git log -1 --pretty="format:%cr%n%H%n%s" "$file")"
 
-    status="$(git status --porcelain "$file")"
-
-    if [[ "$status" == "??"* ]]
+    if [ -n "$log" ]
     then
-        echo -en "${Cred}Untracked$Creset"
-    elif [[ "$status" == "A"* ]]
-    then
-        echo -en "${Cgreen}Staged$Creset"
-    elif git check-ignore "$file" > /dev/null
-    then
-        echo -en "${Cgrey}Gitignored$Creset"
+        awk -v gitlog="$log" -v file="$file" 'BEGIN {
+            split(gitlog,l,"\n");
+            printf "%-'"$file_length"'s\t%-8.15s\t'"$Cyellow"'%.7s'"$Creset"'\t%s\n", file, l[1], l[2], l[3]
+        }'
     else
-        git log -1 --pretty="format:%ar%n%C(Yellow)%h%Creset%n%s" "$file" | tr "\n" "\t"
-    fi
+        printf "%-${file_length}s\t" "$file"
 
-    echo ""
+        status="$(git status --porcelain "$file")"
+
+        if git check-ignore "$file" > /dev/null
+        then
+            echo -e "${Cgrey}Gitignored$Creset"
+        elif [[ "$status" == "??"* ]]
+        then
+            echo -e "${Cred}Untracked$Creset"
+        elif [[ "$status" == "A"* ]]
+        then
+            echo -e "${Cgreen}Staged$Creset"
+        elif [ -z "$status" ]
+        then
+            echo "Empty"
+        fi
+    fi
 done
