@@ -1,18 +1,47 @@
 #!/bin/bash
 
-dotfiles=0
+usage(){
+    echo 'Usage: git ls [-h | --help] [-c] [-a] [[--] directory]'
+}
 
-if [ "$1" = "-a" -o "$1" = "-A" ]
-then
-    shift
-    dotfiles=1
-fi
+
+dotfiles=0
+colors=1
+
+while :
+do
+    case "$1" in
+    --help|-h)
+        usage
+        exit 0
+        ;;
+
+    -a|-A)
+        shift
+        dotfiles=1
+        ;;
+
+    -c|-C)
+        shift
+        colors=0
+        ;;
+
+    --)
+        shift
+        break
+        ;;
+
+    *)
+        break
+        ;;
+    esac
+done
 
 if [ "$#" -ne 0 ]
 then
     if [ ! -d "$1" ]
     then
-        >&2 echo "Usage: git ls [-a] [directory]"
+        usage
         exit 1
     fi
     cd "$1"
@@ -29,6 +58,15 @@ Cred=$'\e[0;31m'
 Cgrey=$'\e[0;37m'
 Cyellow=$'\e[0;33m'
 Creset=$'\e[0m'
+
+if [ "$colors" -ne 1 ]
+then
+    Cgreen=''
+    Cred=''
+    Cgrey=''
+    Cyellow=''
+    Creset=''
+fi
 
 file_length="$(ls | wc -L)"
 
