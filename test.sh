@@ -28,6 +28,8 @@ echo '/tests/ignored/test
 /tests/ignored-dir-both/
 ' >> .gitignore
 
+PATH="$(git rev-parse --show-toplevel):$PATH"
+
 mkdir -p tests
 cd tests
 
