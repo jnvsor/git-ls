@@ -63,11 +63,11 @@ fi
 
 if [ "$colors" -eq 1 ]
 then
-    Cgreen=$'\e[0;32m'
-    Cred=$'\e[0;31m'
-    Cgrey=$'\e[0;37m'
-    Cyellow=$'\e[0;33m'
-    Creset=$'\e[0m'
+    cStaged=$'\e[0;32m'
+    cUntracked=$'\e[0;31m'
+    cIgnored=$'\e[0;37m'
+    cHash=$'\e[0;33m'
+    cReset=$'\e[0m'
 fi
 
 if [ "$formatting" -eq 1 ]
@@ -98,7 +98,7 @@ do
         else
             awk -v gitlog="$log" -v file="$file" 'BEGIN {
                 split(gitlog,l,"\t");
-                printf "%-'"$file_length"'s\t%-8.15s\t'"$Cyellow"'%.7s'"$Creset"'\t%s\n", file, l[1], l[2], l[3]
+                printf "%-'"$file_length"'s\t%-8.15s\t'"$cHash"'%.7s'"$cReset"'\t%s\n", file, l[1], l[2], l[3]
             }'
         fi
     else
@@ -113,13 +113,13 @@ do
 
         if git check-ignore "$file" > /dev/null
         then
-            echo -e "${Cgrey}Gitignored$Creset"
+            echo -e "${cIgnored}Gitignored$cReset"
         elif [[ "$status" == "??"* ]]
         then
-            echo -e "${Cred}Untracked$Creset"
+            echo -e "${cUntracked}Untracked$cReset"
         elif [[ "$status" == "A"* ]]
         then
-            echo -e "${Cgreen}Staged$Creset"
+            echo -e "${cStaged}Staged$cReset"
         elif [ -z "$status" ]
         then
             echo "Empty"
