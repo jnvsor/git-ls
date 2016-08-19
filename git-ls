@@ -29,10 +29,11 @@ Cred='\033[0;31m'
 Cgrey='\033[0;37m'
 Creset='\033[0m'
 
-file_length="$(ls -A | wc -L)"
+file_length="$(ls | wc -L)"
 
 if [ "$dotfiles" -eq 1 ]
 then
+    file_length="$(ls -A | wc -L)"
     shopt -s dotglob
 fi
 
