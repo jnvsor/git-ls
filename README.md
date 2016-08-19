@@ -1,6 +1,8 @@
 # git-ls
 List files and show their last commits
 
+[![Build Status](https://travis-ci.org/jnvsor/git-ls.svg?branch=master)](https://travis-ci.org/jnvsor/git-ls)
+
 ## Installation
 Drop it in your `$PATH` with executable rights
 
