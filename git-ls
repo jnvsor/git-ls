@@ -103,7 +103,7 @@ do
 
     if echo "$comitted" | grep -Fxq "$file"
     then
-        log="$(git log -1 --pretty="format:%cr"$'\t'"%H"$'\t'"%s" "$file")"
+        log="$(git log -1 --pretty="format:%cr"$'\t'"%H"$'\t'"%s" -- "$file")"
 
         if [ "$formatting" -eq 0 ]
         then
