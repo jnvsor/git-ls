@@ -77,8 +77,12 @@ then
     if [ "$dotfiles" -eq 1 ]
     then
         file_length="$(ls -A | wc -L)"
-        shopt -s dotglob
     fi
+fi
+
+if [ "$dotfiles" -eq 1 ]
+then
+    shopt -s dotglob
 fi
 
 for file in *
