@@ -114,19 +114,36 @@ do
         printf "%-${file_length}s\t" "$file"
     fi
 
+    status="$(git status --porcelain "$file")"
+
     if echo "$comitted" | grep -Fxq "$file"
     then
+        if echo "$status" | grep -q "^[AM]"
+        then
+            status="$cStaged"
+        elif [[ "$status" == " M"* ]]
+        then
+            status="$cUntracked"
+        else
+            status=""
+        fi
+
         log="$(git log -1 --pretty="format:%cr"$'\t'"%H"$'\t'"%s" -- "$file")"
 
         if [ "$formatting" -eq 0 ]
         then
             echo "$log"
         else
-            awk -v gitlog="$log" 'BEGIN { split(gitlog,l,"\t"); printf "%-8.15s\t'"$cHash"'%.7s'"$cReset"'\t%s\n", l[1], l[2], l[3] }'
+            awk -v gitlog="$log" -v status="$status" 'BEGIN {
+                tab = index(gitlog, "\t");
+                time = substr(gitlog, 0, tab - 1);
+                hash = substr(gitlog, tab + 1, 40);
+                message = substr(gitlog, tab + 42);
+
+                printf "%s%-8.15s'"$cReset"'\t'"$cHash"'%.7s'"$cReset"'\t%s\n", status, time, hash, message
+            }'
         fi
     else
-        status="$(git status --porcelain "$file")"
-
         if git check-ignore "$file" > /dev/null
         then
             echo -e "${cIgnored}Gitignored$cReset"
