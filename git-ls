@@ -85,6 +85,8 @@ then
     shopt -s dotglob
 fi
 
+comitted="$(git ls-tree --name-only HEAD)"
+
 for file in *
 do
     if [ "$file" = ".git" ]
@@ -99,10 +101,10 @@ do
         printf "%-${file_length}s\t" "$file"
     fi
 
-    log="$(git log -1 --pretty="format:%cr"$'\t'"%H"$'\t'"%s" "$file")"
-
-    if [ -n "$log" ]
+    if echo "$comitted" | grep -Fxq "$file"
     then
+        log="$(git log -1 --pretty="format:%cr"$'\t'"%H"$'\t'"%s" "$file")"
+
         if [ "$formatting" -eq 0 ]
         then
             echo "$log"
