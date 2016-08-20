@@ -83,13 +83,17 @@ then
     cReset=$'\e[0m'
 fi
 
+function max_line_length() {
+    python -c 'import sys; print(max(len(l) for l in sys.stdin))'
+}
+
 if [ "$formatting" -eq 1 ]
 then
-    file_length="$(ls | wc -L)"
+    file_length="$(ls | max_line_length)"
 
     if [ "$dotfiles" -eq 1 ]
     then
-        file_length="$(ls -A | wc -L)"
+        file_length="$(ls -A | max_line_length)"
     fi
 fi
 
