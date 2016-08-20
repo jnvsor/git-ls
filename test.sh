@@ -15,13 +15,13 @@
 
 cleanup(){
     cd "$(git rev-parse --show-toplevel)"
-    git reset --hard HEAD
+    git reset HEAD
     git clean -df .
     exit "$1"
 }
 
 # Setup tests
-git reset --hard HEAD
+git reset HEAD
 git clean -df .
 echo '/tests/ignored/test
 /tests/ignored-dir/
