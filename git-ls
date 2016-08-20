@@ -86,13 +86,13 @@ fi
 
 if [ "$dotfiles" -eq 1 ]
 then
-    file_length="$(ls -A | wc -L)"
+    file_length="$(ls -A | awk '{ if (length($0) > max) max = length($0) } END { print max }')"
     shopt -s dotglob
 else
-    file_length="$(ls | wc -L)"
+    file_length="$(ls | awk '{ if (length($0) > max) max = length($0) } END { print max }')"
 fi
 
-if [ "$file_length" -eq 0 ]
+if [ -z "$file_length" ]
 then
     exit 0
 fi
