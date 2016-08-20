@@ -154,7 +154,12 @@ do
             echo -e "${cStaged}Staged$cReset"
         elif [ -z "$status" ]
         then
-            echo "Empty"
+            if [ -z "$(ls -A "$file")" ]
+            then
+                echo "Empty"
+            else
+                echo -e "${cIgnored}Gitignored$cReset"
+            fi
         fi
     fi
 done

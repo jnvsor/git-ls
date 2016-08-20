@@ -68,7 +68,7 @@ git add staged
 
 # Test output
 result="$(git ls -b -a)"
-expected=$'ignored\tEmpty
+expected=$'ignored\tGitignored
 ignored-dir\tGitignored
 ignored-dir-both\tStaged
 staged\tStaged
@@ -85,7 +85,7 @@ fi
 
 # Test formatting
 result="$(git ls -c -a)"
-expected=$'ignored         \tEmpty
+expected=$'ignored         \tGitignored
 ignored-dir     \tGitignored
 ignored-dir-both\tStaged
 staged          \tStaged
