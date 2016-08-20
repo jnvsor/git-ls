@@ -83,19 +83,18 @@ then
     cReset=$'\e[0m'
 fi
 
-if [ "$formatting" -eq 1 ]
-then
-    file_length="$(ls | wc -L)"
-
-    if [ "$dotfiles" -eq 1 ]
-    then
-        file_length="$(ls -A | wc -L)"
-    fi
-fi
 
 if [ "$dotfiles" -eq 1 ]
 then
+    file_length="$(ls -A | wc -L)"
     shopt -s dotglob
+else
+    file_length="$(ls | wc -L)"
+fi
+
+if [ "$file_length" -eq 0 ]
+then
+    exit 0
 fi
 
 comitted="$(git ls-tree --name-only HEAD)"

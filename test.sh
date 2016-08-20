@@ -119,4 +119,13 @@ then
     cleanup 1
 fi
 
+# Test empty dir
+result="$(git ls -b -a "test-empty")"
+expected=""
+
+if [ "$result" != "$expected" ]
+then
+    cleanup 1
+fi
+
 cleanup 0
