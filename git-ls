@@ -113,14 +113,27 @@ do
         printf "%-${file_length}s\t" "$file"
     fi
 
-    status="$(git status --porcelain "$file")"
+    git diff-index --quiet --cached HEAD "$file"
+    staged=$?
+    git diff-files --quiet "$file"
+    modified=$?
+
+    if [ -d "$file" ]
+    then
+        untracked="$file/"
+    else
+        untracked="$file"
+    fi
+
+    ! git ls-files --other --error-unmatch --exclude-standard --directory "$untracked" 2>/dev/null | grep -q .
+    untracked=$?
 
     if echo "$comitted" | grep -Fxq "$file"
     then
-        if echo "$status" | grep -q "^[AM]"
+        if [ $staged -eq 1 ]
         then
             status="$cStaged"
-        elif [[ "$status" == " M"* ]]
+        elif [ $modified -eq 1 -o $untracked -eq 1 ]
         then
             status="$cUntracked"
         else
@@ -143,23 +156,20 @@ do
             }'
         fi
     else
-        if git check-ignore "$file" > /dev/null
-        then
-            echo -e "${cIgnored}Gitignored$cReset"
-        elif [[ "$status" == "??"* ]]
-        then
-            echo -e "${cUntracked}Untracked$cReset"
-        elif [[ "$status" == "A"* ]]
+        if [ $staged -eq 1 ]
         then
             echo -e "${cStaged}Staged$cReset"
-        elif [ -z "$status" ]
+        elif git check-ignore "$file" > /dev/null
         then
-            if [ -z "$(ls -A "$file")" ]
-            then
-                echo "Empty"
-            else
-                echo -e "${cIgnored}Gitignored$cReset"
-            fi
+            echo -e "${cIgnored}Gitignored$cReset"
+        elif [ $untracked -eq 1 ]
+        then
+            echo -e "${cUntracked}Untracked$cReset"
+        elif [ -z "$(find "$file" -maxdepth 0 -type d -empty 2>/dev/null)" ]
+        then
+            echo -e "${cIgnored}Gitignored$cReset"
+        else
+            echo "Empty"
         fi
     fi
 done
