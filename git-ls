@@ -21,6 +21,7 @@ usage(){
 dotfiles=0
 colors=1
 formatting=1
+recursive=0
 
 while :
 do
@@ -45,6 +46,10 @@ do
         formatting=0
         colors=0
         ;;
+	-r)
+		recursive=1
+		shift
+		;;
 
     --)
         shift
@@ -97,79 +102,92 @@ then
     exit 0
 fi
 
-comitted="$(git ls-tree --name-only HEAD)"
+ls-dir () {
+	cd "$1"
 
-for file in *
-do
-    if [ "$file" = ".git" ]
-    then
-        continue
-    fi
+	local comitted="$(git ls-tree --name-only HEAD)"
 
-    if [ "$formatting" -eq 0 ]
-    then
-        echo -ne "$file\t"
-    else
-        printf "%-${file_length}s\t" "$file"
-    fi
+	for file in *
+	do
+	    if [ "$file" = ".git" ]
+	    then
+	        continue
+	    fi
 
-    git diff-index --quiet --cached HEAD "$file"
-    staged=$?
-    git diff-files --quiet "$file"
-    modified=$?
+      echo -ne "$2/"
+	    if [ "$formatting" -eq 0 ]
+	    then
+	        echo -ne "$file\t"
+	    else
+	        printf "%-${file_length}s\t" "$file"
+	    fi
 
-    if [ -d "$file" ]
-    then
-        untracked="$file/"
-    else
-        untracked="$file"
-    fi
+	    git diff-index --quiet --cached HEAD "$file"
+	    staged=$?
+	    git diff-files --quiet "$file"
+	    modified=$?
 
-    ! git ls-files --other --error-unmatch --exclude-standard --directory "$untracked" 2>/dev/null | grep -q .
-    untracked=$?
+	    if [ -d "$file" ]
+	    then
+	        untracked="$file/"
+	    else
+	        untracked="$file"
+	    fi
 
-    if echo "$comitted" | grep -Fxq "$file"
-    then
-        if [ $staged -eq 1 ]
-        then
-            status="$cStaged"
-        elif [ $modified -eq 1 -o $untracked -eq 1 ]
-        then
-            status="$cUntracked"
-        else
-            status=""
-        fi
+	    ! git ls-files --error-unmatch --exclude-standard --directory "$untracked" 2>/dev/null | grep -q .
+	    untracked=$?
 
-        log="$(git log -1 --pretty="format:%cr"$'\t'"%H"$'\t'"%s" -- "$file")"
+	    if echo "$comitted" | grep -Fx "$file"
+	    then
+	        if [ $staged -eq 1 ]
+	        then
+	            status="$cStaged"
+	        elif [ $modified -eq 1 -o $untracked -eq 1 ]
+	        then
+	            status="$cUntracked"
+	        else
+	            status=""
+	        fi
 
-        if [ "$formatting" -eq 0 ]
-        then
-            echo "$log"
-        else
-            awk -v gitlog="$log" -v status="$status" 'BEGIN {
-                tab = index(gitlog, "\t");
-                time = substr(gitlog, 0, tab - 1);
-                hash = substr(gitlog, tab + 1, 40);
-                message = substr(gitlog, tab + 42);
+	        log="$(git log -1 --pretty="format:%cr"$'\t'"%H"$'\t'"%s" -- "$file")"
 
-                printf "%s%-8.15s'"$cReset"'\t'"$cHash"'%.7s'"$cReset"'\t%s\n", status, time, hash, message
-            }'
-        fi
-    else
-        if [ $staged -eq 1 ]
-        then
-            echo -e "${cStaged}Staged$cReset"
-        elif git check-ignore "$file" > /dev/null
-        then
-            echo -e "${cIgnored}Gitignored$cReset"
-        elif [ $untracked -eq 1 ]
-        then
-            echo -e "${cUntracked}Untracked$cReset"
-        elif [ -z "$(find "$file" -maxdepth 0 -type d -empty 2>/dev/null)" ]
-        then
-            echo -e "${cIgnored}Gitignored$cReset"
-        else
-            echo "Empty"
-        fi
-    fi
-done
+	        if [ "$formatting" -eq 0 ]
+	        then
+	            echo "$log"
+	        else
+	            awk -v gitlog="$log" -v status="$status" 'BEGIN {
+	                tab = index(gitlog, "\t");
+	                time = substr(gitlog, 0, tab - 1);
+	                hash = substr(gitlog, tab + 1, 40);
+	                message = substr(gitlog, tab + 42);
+
+	                printf "%s%-8.15s'"$cReset"'\t'"$cHash"'%.7s'"$cReset"'\t%s\n", status, time, hash, message
+	            }'
+	        fi
+	    else
+	        if [ $staged -eq 1 ]
+	        then
+	            echo -e "${cStaged}Staged$cReset"
+	        elif git check-ignore "$file" > /dev/null
+	        then
+	            echo -e "${cIgnored}Gitignored$cReset"
+	        elif [ $untracked -eq 1 ]
+	        then
+	            echo -e "${cUntracked}Untracked$cReset"
+	        elif [ -z "$(find "$file" -maxdepth 0 -type d -empty 2>/dev/null)" ]
+	        then
+	            echo -e "${cIgnored}Gitignored$cReset"
+	        else
+	            echo "Empty"
+	        fi
+	    fi
+
+		if [ "$recursive" -eq 1 ] && [ -d "$file" ]
+		then
+			ls-dir "$file" "$2/$file"
+			cd ../
+		fi
+	done
+}
+
+ls-dir . "$1"
