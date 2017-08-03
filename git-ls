@@ -137,7 +137,7 @@ ls-dir () {
 	    ! git ls-files --error-unmatch --exclude-standard --directory "$untracked" 2>/dev/null | grep -q .
 	    untracked=$?
 
-	    if echo "$comitted" | grep -Fx "$file"
+	    if echo "$comitted" | grep -Fxq "$file"
 	    then
 	        if [ $staged -eq 1 ]
 	        then
